@@ -13,12 +13,13 @@ public:
 
 signals:
 
-public slots:
 
 private slots:
     void nouveauJoueur();
     void sockDisconnected();
     void joueurMeParle();
+    void Proceed(const QJsonObject &json);
+    void check_credentials(const QJsonObject &jsons);
 private:
     QTcpServer* mServeur;
     QList<QTcpSocket*> mListeSocks;

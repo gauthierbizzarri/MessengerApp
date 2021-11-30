@@ -126,7 +126,7 @@ font: 75 13pt &quot;TeX Gyre Bonum Math&quot;;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_password">
+            <widget class="QLineEdit" name="lineEdit_username">
              <property name="styleSheet">
               <string notr="true">display: block;
     height: 50px;
@@ -197,7 +197,7 @@ font: 75 13pt &quot;TeX Gyre Bonum Math&quot;;</string>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="lineEdit_username">
+            <widget class="QLineEdit" name="lineEdit_password">
              <property name="styleSheet">
               <string notr="true">display: block;
     height: 50px;

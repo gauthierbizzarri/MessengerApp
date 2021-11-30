@@ -6,6 +6,9 @@
 #include <QTextDocument>
 #include <QApplication>
 #include <QPrinter>
+#include <QFile>
+#include <QDir>
+#include <QStringList>
 
 Messenger_Main::Messenger_Main(QWidget *parent) :
     QMainWindow(parent),
@@ -70,6 +73,22 @@ void Messenger_Main::Add_Contact()
 }
 void Messenger_Main::Export_PDF()
 {
+    qDebug()<<QDir::currentPath();
+
+    QFile file("test.csv");
+        if (!file.open(QIODevice::ReadOnly)) {
+            qDebug() << file.errorString();
+            return ;
+        }
+
+        QStringList wordList;
+        while (!file.atEnd()) {
+            QByteArray line = file.readLine();
+            wordList.append(line.split(',').first());
+        }
+
+        qDebug() << wordList;
+
 }
 //Send message to only one user
 void Messenger_Main::Send_Message(){
@@ -106,14 +125,12 @@ if  (message.isNull())
     message_to_send_JSON.insert("action", QJsonValue::fromVariant("send"));
     message_to_send_JSON.insert("to", QJsonValue::fromVariant(receiver));
     message_to_send_JSON.insert("content", QJsonValue::fromVariant(message));
-    qDebug()<<message_to_send_JSON;
 
     // SENDING JSON TO SERVER
     sock->connectToHost("localhost",8585);
     QJsonDocument doc(message_to_send_JSON);
     QString jsString = doc.toJson(QJsonDocument::Compact);
-    qDebug() << sock->readAll();
-    sock->write(jsString.toLatin1());
+    sock->write(jsString.toUtf8());
     //Display in listWidget_Messages
         //should get messages with a contact
     ui->listWidget_Messages->addItem(MessageItem);
