@@ -91,7 +91,6 @@ QByteArray data = sock->readAll();
 
 void MainWindow::serveurConnected() {
     sock = (QTcpSocket *) sender();
-    sock->write("Je suis co aux Serveurs !");
 }
 
 
