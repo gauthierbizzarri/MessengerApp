@@ -1,4 +1,5 @@
 #include "messenger_main.h"
+#include <mainwindow.h>
 #include "ui_messenger_main.h"
 #include <QDateTime>
 #include <QJsonObject>
@@ -10,17 +11,14 @@
 #include <QDir>
 #include <QStringList>
 
+
+
 Messenger_Main::Messenger_Main(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Messenger_Main)
 
 {
     ui->setupUi(this);
-    // CONNECT TO SERVER
-    QTcpSocket* sock = new QTcpSocket(this);
-        connect(sock,SIGNAL(readyRead()),this,SLOT(serveurMeParle()));
-        connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
-    sock->connectToHost("localhost",8585);
     //Background image
 
     QPixmap bkgnd("/home/bizzarri/mess2/login_background.jpg");
@@ -29,6 +27,11 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
         palette.setBrush(QPalette::Background, bkgnd);
         this->setPalette(palette);
 
+    sock = new QTcpSocket(this);
+    connect(sock, SIGNAL(readyRead()), this, SLOT(serveurMeParle()));
+    connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
+    connect(sock, SIGNAL(connected()), this, SLOT(serveurConnected()));
+    sock->connectToHost("localhost", 8585);
     //pushButton_Export_PDF
     connect(ui->pushButton_Export_PDF,SIGNAL(clicked(bool)),this,SLOT(Export_PDF()));
 
@@ -42,7 +45,6 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
     //Select Contact from listWidget_Contacts with double click
       connect(ui->listWidget_Contacts,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(Select_Contact(QListWidgetItem*)));
 
-      //label_Contact_Selected
 
 }
 
@@ -50,6 +52,7 @@ Messenger_Main::~Messenger_Main()
 {
     delete ui;
 }
+//THIS FUNCTION WILL
 void Messenger_Main::Add_Contact()
 {
     QTcpSocket* sock = new QTcpSocket(this);
@@ -71,44 +74,22 @@ void Messenger_Main::Add_Contact()
     ui->lineEdit_Add_Contact->setText("");
 
 }
-void Messenger_Main::Export_PDF()
-{
-    qDebug()<<QDir::currentPath();
 
-    QFile file("test.csv");
-        if (!file.open(QIODevice::ReadOnly)) {
-            qDebug() << file.errorString();
-            return ;
-        }
+//THIS FUNCTION AIMS TO EXPORT THE CURRENT CONVERSATION AS PDF
+void Messenger_Main::Export_PDF(){}
 
-        QStringList wordList;
-        while (!file.atEnd()) {
-            QByteArray line = file.readLine();
-            wordList.append(line.split(',').first());
-        }
-
-        qDebug() << wordList;
-
-}
-//Send message to only one user
+//THIS FUNCTION AIMS TO SEND A MESSAGE TO ONLY ONE USER ....
 void Messenger_Main::Send_Message(){
     QString message = ui->lineEdit_message_to_send->text();
 if  (message.isNull())
         return; // We don't send empty messages
     else{
-    //CONNECTING TO SERVER IF CREDENTIALS CORRECT
-    QTcpSocket* sock = new QTcpSocket(this);
-        connect(sock,SIGNAL(readyRead()),this,SLOT(serveurMeParle()));
-        connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
-
-    //ContactSelected->text(); is the name of the current user
-    qDebug()<<ContactSelected->text();
-    //get receiver // TO FIX ONLY ONE NOW
-
+    //GETTING RECEIVER
     QString receiver = ContactSelected->text();
 
-    //get message from lineEdit_message_to_send
 
+
+    //get message from lineEdit_message_to_send
 
 
 
@@ -119,18 +100,17 @@ if  (message.isNull())
     //Adding message to the QListWidgetItem
     QListWidgetItem* MessageItem = new QListWidgetItem(message_formated);
 
-
     //Creating JSON with Message to send
     QJsonObject  message_to_send_JSON;
     message_to_send_JSON.insert("action", QJsonValue::fromVariant("send"));
     message_to_send_JSON.insert("to", QJsonValue::fromVariant(receiver));
     message_to_send_JSON.insert("content", QJsonValue::fromVariant(message));
 
-    // SENDING JSON TO SERVER
-    sock->connectToHost("localhost",8585);
     QJsonDocument doc(message_to_send_JSON);
     QString jsString = doc.toJson(QJsonDocument::Compact);
-    sock->write(jsString.toUtf8());
+    qDebug()<<jsString;
+    sock->write(jsString.simplified().toLocal8Bit());
+
     //Display in listWidget_Messages
         //should get messages with a contact
     ui->listWidget_Messages->addItem(MessageItem);
@@ -140,12 +120,39 @@ if  (message.isNull())
 }
 
 }
+//THIS FUNCTION IS CALLED TO LOAD MESSAGES SOTRED IN THE DATABASE
 void Messenger_Main::Get_Messages()
-{}
+{
+    //OPENING FILE WITH MESSAGES STORED
+    QFile file("messages.csv");
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << file.errorString();
+        return  ;
+    }
+    QStringList wordList;
+    // Create a thread to retrieve data from a file
+    QTextStream in(&file);
+    //Reads the data up to the end of file
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        // Adding to the model in line with the elements
+        // consider that the line separated by semicolons into columns
+        for (QString item : line.split(";")) {
+            wordList.append(item);
+
+        }
+
+    }
+}
+
+//THIS FUNCTION AIMS TO GET ALL CONTACTS STORED IN THE DATABASE
 void Messenger_Main::Get_Contacts()
 {
     //Get contacts from the server, returns a QWidgetList
 }
+
+//THIS FUNCTION ALLOW THE TCHATER TO TALK TO THE USER WH
 void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
 {
     QString contact = mContact->text();
@@ -156,21 +163,7 @@ void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
     ui->listWidget_Messages->addItem("Conversation with :"+contact);
 }
 
-void Messenger_Main::serveurMeParle()
-{
-    QTcpSocket * sock = (QTcpSocket*)sender();
-    qDebug() << sock->readAll();
 
-}
 
-void Messenger_Main::serveurConnected(QJsonObject *credentials)
-{
-    QJsonDocument doc(*credentials);
-    QString jsString = QString(doc.toJson());
 
-    QTcpSocket * sock = (QTcpSocket*)sender();
-    //credentials->value("action").toString())
-    qDebug() << sock->readAll();
-    sock->write(jsString.toLatin1());
-    sock->write("test");
-}
+

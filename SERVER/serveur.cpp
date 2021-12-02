@@ -11,16 +11,18 @@ serveur::serveur(QObject *parent) : QObject(parent)
     connect(mServeur,SIGNAL(newConnection()),this,SLOT(nouveauJoueur()));
     mServeur->listen(QHostAddress::Any,8585);
 }
+
+
+//THIS FUNCTION AIMS TO WRITE A QJSONOBJECT INTO THE SOCKET THE ANSWER TO THE LOGIN ACTION : ERROR OR OK
 void serveur::check_credentials(const QJsonObject &json)
 {
     QTcpSocket *sock = (QTcpSocket *) sender();
     QString login = json["login"].toString();
     QString password = json["password"].toString();
-    //qDebug()<<"PASSWORD SELECTED"<<password<<"LOGIN SELECTED"<<login;
     //qDebug()<<"Finding file with sotred credentials : "<<QDir::currentPath();
 
     //OPENING FILE WITH CREDENTIALS STORED
-    QFile file("test.csv");
+    QFile file("credentials.csv");
     if (!file.open(QIODevice::ReadOnly)) {
         qDebug() << file.errorString();
         return  ;
@@ -54,10 +56,7 @@ void serveur::check_credentials(const QJsonObject &json)
                 answer_JSON_object.insert("state", QJsonValue::fromVariant("ok"));
 
                 QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
-                //qDebug()<<"JSON RESPOSNE LOGIN"<<answer;
-                qDebug()<<"STRING SENT" <<answer_QString.toLocal8Bit();
                 sock->write(answer_QString.toLocal8Bit());
-                qDebug()<<"dans le readall"<<sock->readAll();
                 cpt++;
 
             }
@@ -79,14 +78,44 @@ void serveur::check_credentials(const QJsonObject &json)
 
 }
 
+//THIS FUNCTION AIMS TO WRITE INTO THE SOCKET THE MESSAGE SENT
+void serveur::send_message(const QJsonObject &json)
+{
+     QTcpSocket *sock = (QTcpSocket *) sender();
+    //GETTING VALUES FROM THE JSON
+    QString message = json["content"].toString();
+    QString receivers = json["to"].toString();
+    qDebug()<<message;
+    //GETTING CURRENT TIME
+     QString date = QDateTime::currentDateTime().toString(" dd/MM/yy hh:mm");
 
+     // WRITE INTO THE FILE TO STORE MESSAGES
+     QFile file("messages_1.csv");
+     if (file.open(QIODevice::Append | QIODevice::Text))
+     {
+     QTextStream stream(&file);
+     stream <<message<< "\t"<< receivers <<"\t";
+     file.close();
+     }
+    //CREATING JSON
+    QJsonObject  answer_JSON_object;
+    answer_JSON_object.insert("action", QJsonValue::fromVariant("receive"));
+    answer_JSON_object.insert("from", QJsonValue::fromVariant(receivers));
+    answer_JSON_object.insert("datetime", QJsonValue::fromVariant(date));
+
+
+    QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
+    sock->write(answer_QString.toLocal8Bit());
+}
+
+//THIS FUNCTION AIMS TO READ THE CONTENT OF THE QJSONOBJECT SENT AND TO RUN THE CORRESPONDING ACTION
 void serveur::Proceed(const QJsonObject &json){
     if (json.constFind("action") != json.constEnd()) {
         if (json["action"].toString() == "login") {
             check_credentials(json);
         };
         if (json["action"].toString() == "send") {
-            qDebug() << "j'envoie un message" << json;
+            send_message(json);
         };
     };
 }

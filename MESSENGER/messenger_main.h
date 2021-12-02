@@ -23,12 +23,13 @@ private slots:
     void Add_Contact();
     void Get_Contacts();
     void Select_Contact(QListWidgetItem *contact);
-    void serveurMeParle();
-    void serveurConnected(QJsonObject *credentials);
+
 private:
     Ui::Messenger_Main *ui;
+    QTcpSocket *sock;
     QListWidgetItem* MessageItem = nullptr;
     QListWidgetItem* ContactSelected = nullptr;
+    QList <QMap<QString,QString>>* Conversations = nullptr;
 };
 
 #endif // MESSENGER_MAIN_H

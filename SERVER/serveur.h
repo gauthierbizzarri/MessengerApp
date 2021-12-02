@@ -20,6 +20,7 @@ private slots:
     void joueurMeParle();
     void Proceed(const QJsonObject &json);
     void check_credentials(const QJsonObject &jsons);
+    void send_message(const QJsonObject &json);
 private:
     QTcpServer* mServeur;
     QList<QTcpSocket*> mListeSocks;
