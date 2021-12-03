@@ -28,9 +28,9 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
         this->setPalette(palette);
 
     sock = new QTcpSocket(this);
-    connect(sock, SIGNAL(readyRead()), this, SLOT(serveurMeParle()));
+    connect(sock, SIGNAL(readyRead()), this, SLOT(serveurMeParle2()));
     connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
-    connect(sock, SIGNAL(connected()), this, SLOT(serveurConnected()));
+    connect(sock, SIGNAL(connected()), this, SLOT(serveurConnected2()));
     sock->connectToHost("localhost", 8585);
     //pushButton_Export_PDF
     connect(ui->pushButton_Export_PDF,SIGNAL(clicked(bool)),this,SLOT(Export_PDF()));
@@ -56,14 +56,16 @@ Messenger_Main::~Messenger_Main()
 void Messenger_Main::Add_Contact()
 {
     QTcpSocket* sock = new QTcpSocket(this);
-    connect(sock,SIGNAL(readyRead()),this,SLOT(serveurMeParle()));
+    connect(sock,SIGNAL(readyRead()),this,SLOT(serveurMeParle2()));
     connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
     sock->connectToHost("localhost",8585);
     //get contact from lineEdit_Add_Contact
     //a method will get all contacts and will __ie__contains return a window with existing contacts , the user select it and it will be added
 
     QString contact = ui->lineEdit_Add_Contact->text();
-
+    if  (contact=="")
+            return; // We don't add empty contacts
+        else{
     //Adding Contact to the QListWidgetItem
     QListWidgetItem* Contact_Item = new QListWidgetItem(contact);
 
@@ -73,7 +75,7 @@ void Messenger_Main::Add_Contact()
     //Making the lineEdit_message_to_send clear (preparing new message to send)
     ui->lineEdit_Add_Contact->setText("");
 
-}
+}}
 
 //THIS FUNCTION AIMS TO EXPORT THE CURRENT CONVERSATION AS PDF
 void Messenger_Main::Export_PDF(){}
@@ -161,9 +163,43 @@ void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
     //Get the conversation with this contact and display it into : listWidget_Messages
     //for element in conversation :
     ui->listWidget_Messages->addItem("Conversation with :"+contact);
+
+    QJsonObject  contact_Json;
+    contact_Json.insert("contact", QJsonValue::fromVariant(contact));
+     contact_Json.insert("action", QJsonValue::fromVariant("get_messages"));
+
+    // SENDING JSON TO SERVER
+    QJsonDocument doc(contact_Json);
+    QString jsString = doc.toJson(QJsonDocument::Compact);
+    qDebug()<<"Le client a envoyé "<<jsString;
+    sock->write(jsString.simplified().toLocal8Bit());
+
 }
 
+void Messenger_Main::serveurMeParle2()
+{
+QByteArray data = sock->readAll();
+    qDebug()<<"Server sent a response"<<data;
+   if (data.isEmpty()) {
+       qDebug() << "No data was currently available for reading from file";
+   }
+   QJsonObject jsonObject = QJsonDocument::fromJson(data).object();
 
+   //WE RECEIVE ALL CONTACTS FROM THE SERVER
+   ui->listWidget_Messages->clear();
+   if (jsonObject["action"].toString() == "get_contacts") {
+             ui->lineEdit_message_to_send->setText("");
+          QMessageBox::information(this, "Messages", "Getting conversation with contact...");
+          // DISPLAYING THE CONVERSATION :
 
+       //QMetaObject::invokeMethod( Messenger_Main::Add_Contact(), "doTask", Q_ARG( int, param ) );
+          QListWidgetItem* Message =  new QListWidgetItem(jsonObject["messages"].toString());
+          ui->listWidget_Messages->addItem(Message);
+   }
+}
+
+void Messenger_Main::serveurConnected2() {
+    sock = (QTcpSocket *) sender();
+}
 
 

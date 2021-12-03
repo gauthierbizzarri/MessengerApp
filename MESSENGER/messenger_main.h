@@ -16,7 +16,11 @@ public:
     explicit Messenger_Main(QWidget *parent = nullptr);
     ~Messenger_Main();
 
+public slots:
+
 private slots:
+     void serveurMeParle2();
+     void serveurConnected2();
     void Export_PDF();
     void Send_Message();
     void Get_Messages();

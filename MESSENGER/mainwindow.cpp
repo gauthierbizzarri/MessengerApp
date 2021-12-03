@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include"messenger_main.h"
+#include "messenger_main.h"
 #include <QMessageBox>
 #include <QPixmap>
 #include <QJsonObject>
@@ -71,11 +72,13 @@ void MainWindow::pushButton_Login_clicked()
 void MainWindow::serveurMeParle()
 {
 QByteArray data = sock->readAll();
-    qDebug()<<"LE serveur a parlé"<<data;
+    qDebug()<<"Server sent a response"<<data;
    if (data.isEmpty()) {
        qDebug() << "No data was currently available for reading from file";
    }
    QJsonObject jsonObject = QJsonDocument::fromJson(data).object();
+
+   //WE GET AN ANSWER LOGIN FROM THE SERVER
    if (jsonObject["action"].toString() == "answerlogin") {
        if (jsonObject["state"].toString() == "ok") {
            hide();
@@ -85,6 +88,12 @@ QByteArray data = sock->readAll();
        } else {
            QMessageBox::information(this, "Login", "Credentials not correct : try again");
        }
+   }
+   //WE RECEIVE ALL CONTACTS FROM THE SERVER
+   if (jsonObject["action"].toString() == "get_contacts") {
+    //ADD CONTACTS TO THE CONTACTS LIST
+
+       //QMetaObject::invokeMethod( Messenger_Main::Add_Contact(), "doTask", Q_ARG( int, param ) );
    }
 }
 

@@ -117,6 +117,10 @@ void serveur::Proceed(const QJsonObject &json){
         if (json["action"].toString() == "send") {
             send_message(json);
         };
+        if (json["action"].toString() == "get_messages") {
+            get_messages(json);
+        };
+
     };
 }
 
@@ -136,6 +140,49 @@ void serveur::sockDisconnected()
     delete sock;
 }
 
+void serveur::get_messages(const QJsonObject &json)
+{
+    QTcpSocket *sock = (QTcpSocket *) sender();
+
+    //OPENING FILE WITH CREDENTIALS STORED WHERE LOGINS ATE STORED TOO
+    QFile file("messages_1.csv");
+    if (!file.open(QIODevice::ReadOnly)) {
+        qDebug() << file.errorString();
+        return  ;
+    }
+    QStringList wordList;
+    // Create a thread to retrieve data from a file
+    QTextStream in(&file);
+    //Reads the data up to the end of file
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        // Adding to the model in line with the elements
+        // consider that the line separated by semicolons into columns
+        for (QString item : line.split(";")) {
+            wordList.append(item);
+
+        }
+
+    }
+    qDebug()<<wordList;
+    qDebug()<<"Server asked for "<<json;
+    int cpt=0;
+    for(int i = 0 ;i<=wordList.count()/2;i++)
+    {
+        qDebug()<<"LOGIN"<<wordList[i];
+                //SENDING ANSWER
+                //CREATING JSON WITH ANSWER
+                QJsonObject  answer_JSON_object;
+                answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i]));
+                answer_JSON_object.insert("action", QJsonValue::fromVariant("get_contacts"));
+
+                QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
+                sock->write(answer_QString.toLocal8Bit());
+                cpt++;
+
+
+    }}
 void serveur::joueurMeParle()
 {
     QTcpSocket *sock = (QTcpSocket *) sender();

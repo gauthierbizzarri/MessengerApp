@@ -11,6 +11,8 @@ class serveur : public QObject
 public:
     explicit serveur(QObject *parent = nullptr);
 
+public slots:
+
 signals:
 
 
@@ -20,6 +22,7 @@ private slots:
     void joueurMeParle();
     void Proceed(const QJsonObject &json);
     void check_credentials(const QJsonObject &jsons);
+    void get_messages(const QJsonObject &json);
     void send_message(const QJsonObject &json);
 private:
     QTcpServer* mServeur;
