@@ -94,7 +94,7 @@ void serveur::send_message(const QJsonObject &json)
      if (file.open(QIODevice::Append | QIODevice::Text))
      {
      QTextStream stream(&file);
-     stream <<message<< "\t"<< receivers <<"\t";
+     stream <<message<< "\t"<< receivers <<"\n";
      file.close();
      }
     //CREATING JSON
@@ -159,30 +159,28 @@ void serveur::get_messages(const QJsonObject &json)
         QString line = in.readLine();
         // Adding to the model in line with the elements
         // consider that the line separated by semicolons into columns
-        for (QString item : line.split(";")) {
-            wordList.append(item);
+            wordList.append(line);
 
-        }
 
     }
-    qDebug()<<wordList;
-    qDebug()<<"Server asked for "<<json;
+    qDebug()<<"wordlist"<<wordList;
     int cpt=0;
-    for(int i = 0 ;i<=wordList.count()/2;i++)
+    for(int i = 0 ;i<=wordList.count()-1;i++)
     {
-        qDebug()<<"LOGIN"<<wordList[i];
                 //SENDING ANSWER
                 //CREATING JSON WITH ANSWER
                 QJsonObject  answer_JSON_object;
                 answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i]));
                 answer_JSON_object.insert("action", QJsonValue::fromVariant("get_contacts"));
-
                 QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
+                answer_QString = answer_QString +";";
                 sock->write(answer_QString.toLocal8Bit());
+                qDebug()<<"Server returned : "<<answer_QString;
                 cpt++;
 
 
-    }}
+    }
+}
 void serveur::joueurMeParle()
 {
     QTcpSocket *sock = (QTcpSocket *) sender();

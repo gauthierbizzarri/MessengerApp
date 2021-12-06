@@ -183,23 +183,38 @@ QByteArray data = sock->readAll();
    if (data.isEmpty()) {
        qDebug() << "No data was currently available for reading from file";
    }
-   QJsonObject jsonObject = QJsonDocument::fromJson(data).object();
 
-   //WE RECEIVE ALL CONTACTS FROM THE SERVER
-   ui->listWidget_Messages->clear();
-   if (jsonObject["action"].toString() == "get_contacts") {
-             ui->lineEdit_message_to_send->setText("");
-          QMessageBox::information(this, "Messages", "Getting conversation with contact...");
-          // DISPLAYING THE CONVERSATION :
-
-       //QMetaObject::invokeMethod( Messenger_Main::Add_Contact(), "doTask", Q_ARG( int, param ) );
-          QListWidgetItem* Message =  new QListWidgetItem(jsonObject["messages"].toString());
-          ui->listWidget_Messages->addItem(Message);
+     ui->listWidget_Messages->clear();
+    QMessageBox::information(this, "Messages", "Getting conversation with contact...");
+   QString DataAsString = QString(data);
+   QStringList messageList;
+   for (QString item : DataAsString.split(";")) {
+       messageList.append(item);
+        QJsonObject jsonObject = QJsonDocument::fromJson(item.toUtf8()).object();
+         QListWidgetItem* Message =  new QListWidgetItem(jsonObject["messages"].toString());
+        ui->listWidget_Messages->addItem(Message);
    }
+   //qDebug()<<"message List"<<messageList;
+   /*
+   for (QString item : messageList) {
+       qDebug()<<item;
+       QJsonObject jsonObject2 = QJsonDocument::fromJson(data).object();
+       qDebug()<<'json received'<<jsonObject2;
+       //WE RECEIVE ALL CONTACTS FROM THE SERVER
+       ui->listWidget_Messages->clear();
+       qDebug()<<"Je lis"<<jsonObject2;
+       if (jsonObject2["action"].toString() == "get_contacts") {
+                 ui->lineEdit_message_to_send->setText("");
+               DISPLAYING THE CONVERSATION :
+              QListWidgetItem* Message =  new QListWidgetItem(jsonObject2["messages"].toString());
+              ui->listWidget_Messages->addItem(Message);
+       }
+
+   //}
+   */
+
 }
 
 void Messenger_Main::serveurConnected2() {
     sock = (QTcpSocket *) sender();
 }
-
-
