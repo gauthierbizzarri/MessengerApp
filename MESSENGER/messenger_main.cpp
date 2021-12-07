@@ -96,60 +96,33 @@ void Messenger_Main::Export_PDF(){
             doc->print(&printer);
 }
 
-//THIS FUNCTION AIMS TO SEND A MESSAGE TO ONLY ONE USER ....
+
 void Messenger_Main::Send_Message(){
     QString message = ui->lineEdit_message_to_send->text();
-    qDebug()<<ContactSelected->text().isEmpty();
     if  (!message.isNull() ||!ContactSelected->text().isEmpty()){
         //GETTING RECEIVER
         QString receiver = ContactSelected->text();
 
-
+        QRegExp regex("(\\;"
+                      ")");
+        QStringList receivers =receiver.split(regex);
         //get message from lineEdit_message_to_send
-
-
 
 
         //Creating JSON with Message to send
         QJsonObject  message_to_send_JSON;
         message_to_send_JSON.insert("action", QJsonValue::fromVariant("send"));
-        message_to_send_JSON.insert("to", QJsonValue::fromVariant(receiver));
+        message_to_send_JSON.insert("to", QJsonValue::fromVariant(receivers));
         message_to_send_JSON.insert("content", QJsonValue::fromVariant(message));
 
         QJsonDocument doc(message_to_send_JSON);
         QString jsString = doc.toJson(QJsonDocument::Compact);
-        qDebug()<<jsString;
         sock->write(jsString.simplified().toLocal8Bit());
 
         //Making the lineEdit_message_to_send clear (preparing new message to send)
         ui->lineEdit_message_to_send->setText("");
     }
 
-}
-//THIS FUNCTION IS CALLED TO LOAD MESSAGES SOTRED IN THE DATABASE
-void Messenger_Main::Get_Messages()
-{
-    //OPENING FILE WITH MESSAGES STORED
-    QFile file("messages.csv");
-    if (!file.open(QIODevice::ReadOnly)) {
-        qDebug() << file.errorString();
-        return  ;
-    }
-    QStringList wordList;
-    // Create a thread to retrieve data from a file
-    QTextStream in(&file);
-    //Reads the data up to the end of file
-    while (!in.atEnd())
-    {
-        QString line = in.readLine();
-        // Adding to the model in line with the elements
-        // consider that the line separated by semicolons into columns
-        for (QString item : line.split(";")) {
-            wordList.append(item);
-
-        }
-
-    }
 }
 //THIS FUNCTION ALLOW THE TCHATER TO TALK TO THE USER WH
 void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
@@ -161,8 +134,6 @@ void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
     ui->listWidget_Messages->clear();
     QMessageBox::information(this, "Messages", "Getting conversation with contact "+contact);
     ui->label_Contact_Selected->setText("Conversation with :"+contact);
-    //Get the conversation with this contact and display it into : listWidget_Messages
-    //for element in conversation :
     ui->listWidget_Messages->addItem("Conversation with :"+contact);
 
     QJsonObject  contact_Json;
@@ -172,7 +143,6 @@ void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
     // SENDING JSON TO SERVER
     QJsonDocument doc(contact_Json);
     QString jsString = doc.toJson(QJsonDocument::Compact);
-    qDebug()<<"Le client a envoyé "<<jsString;
     sock->write(jsString.simplified().toLocal8Bit());
 
 }

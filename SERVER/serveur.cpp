@@ -19,7 +19,6 @@ void serveur::check_credentials(const QJsonObject &json)
     QTcpSocket *sock = (QTcpSocket *) sender();
     QString login = json["login"].toString();
     QString password = json["password"].toString();
-    //qDebug()<<"Finding file with sotred credentials : "<<QDir::currentPath();
 
     //OPENING FILE WITH CREDENTIALS STORED
     QFile file("credentials.csv");
@@ -69,10 +68,7 @@ void serveur::check_credentials(const QJsonObject &json)
         answer_JSON_object.insert("state", QJsonValue::fromVariant("notok"));
 
         QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
-        //qDebug()<<"JSON RESPOSNE LOGIN"<<answer;
-        //qDebug()<<"STRING SENT" <<answer_QString.toLocal8Bit();
         sock->write(answer_QString.toLocal8Bit());
-        //qDebug()<<"dans le readall"<<sock->readAll();
     }
 
 }
@@ -83,18 +79,20 @@ void serveur::send_message(const QJsonObject &json)
     QTcpSocket *sock = (QTcpSocket *) sender();
     //GETTING VALUES FROM THE JSON
     QString message = json["content"].toString();
-    QString receivers = json["to"].toString();
-    qDebug()<<message;
+    QString receivers ="";
+    QJsonArray receivers_Array = json["to"].toArray();
+    foreach(const QJsonValue &value, receivers_Array) {
+    receivers = value.toString()+";";
+    }
     //GETTING CURRENT TIME
     QString date = QDateTime::currentDateTime().toString(" dd/MM/yy hh:mm");
-
 
     // WRITE INTO THE FILE TO STORE MESSAGES
     QFile file("messages_1.csv");
     if (file.open(QIODevice::Append | QIODevice::Text))
     {
         QTextStream stream(&file);
-        stream <<message<< ";"<< "Receivers:"+receivers <<";"<< date <<";"<< "From:"+mLogin <<"\n";
+        stream <<message<< ";"<<"Receivers:"+receivers<<"From:"+mLogin <<";"<<date<<"\n";
         file.close();
     }
     //CREATING JSON
@@ -128,7 +126,7 @@ void serveur::Proceed(const QJsonObject &json){
 
 
 void serveur::nouvelleConnexion() {
-    qDebug() << "un client c'est connecté au serveur";
+    qDebug() << "A client has been connected";
     QTcpSocket *connection = mServeur->nextPendingConnection();
     connect(connection, SIGNAL(disconnected()), this, SLOT(sockDisconnected()));
     connect(connection, SIGNAL(readyRead()), this, SLOT(clientmeparle()));
@@ -137,7 +135,7 @@ void serveur::nouvelleConnexion() {
 void serveur::sockDisconnected() {
     QTcpSocket *sock = (QTcpSocket *) sender();
     mListeSocks.remove(mListeSocks.key(sock));
-    qDebug() << "un client à quittée le serveur";
+    qDebug() << "A client has been diconected";
 }
 
 void serveur::get_messages(const QJsonObject &json)
@@ -164,20 +162,22 @@ void serveur::get_messages(const QJsonObject &json)
 
 
         }}
-    qDebug()<<"WORDLIST"<<wordList<<"COUNT"<<wordList.count();
     QString receivers = json["contact"].toString();
+    qDebug()<<"wordlistcoun"<<wordList.count();
     for(int i = 0 ;i<=wordList.count()-1;)
     {
-        qDebug()<<"worlist i+1"<<wordList[i+1];
-        qDebug()<<"receivers:"<<receivers;
         //Traiter le cas plusieurs users ...
         if (wordList[i+1]=="Receivers:"+receivers){
             //SENDING ANSWER
             //CREATING JSON WITH ANSWER
             QJsonObject  answer_JSON_object;
-            answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i]));
+            if (wordList[i+2]=="From:"+mLogin){
+
+                answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i+3]+"->"+wordList[i]));
+            }
+            else {answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i+3]+"<-"+wordList[i]));}
             answer_JSON_object.insert("action", QJsonValue::fromVariant("get_contacts"));
-            answer_JSON_object.insert("date", QJsonValue::fromVariant(wordList[i+2]));
+            answer_JSON_object.insert("date", QJsonValue::fromVariant(wordList[i+3]));
             QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
             answer_QString = answer_QString +";";
             sock->write(answer_QString.toLocal8Bit());

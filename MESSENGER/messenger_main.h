@@ -23,7 +23,6 @@ private slots:
      void serveurConnected2();
     void Export_PDF();
     void Send_Message();
-    void Get_Messages();
     void Add_Contact();
     void Select_Contact(QListWidgetItem *contact);
 
