@@ -1,4 +1,4 @@
-﻿#include "messenger_main.h"
+#include "messenger_main.h"
 #include <mainwindow.h>
 #include "ui_messenger_main.h"
 #include <QDateTime>
@@ -10,8 +10,7 @@
 #include <QFile>
 #include <QDir>
 #include <QStringList>
-
-
+#include <QFileDialog>
 
 Messenger_Main::Messenger_Main(QWidget *parent) :
     QMainWindow(parent),
@@ -78,7 +77,24 @@ void Messenger_Main::Add_Contact()
     }}
 
 //THIS FUNCTION AIMS TO EXPORT THE CURRENT CONVERSATION AS PDF
-void Messenger_Main::Export_PDF(){}
+void Messenger_Main::Export_PDF(){
+    QString fileName = QFileDialog::getSaveFileName(this, "Export PDF", QString(), "*.pdf");
+               if (QFileInfo(fileName).suffix().isEmpty()) { fileName.append(".pdf"); }
+               QPrinter printer(QPrinter::PrinterResolution);
+            printer.setOutputFormat(QPrinter::PdfFormat);
+            printer.setPaperSize(QPrinter::A4);
+            printer.setOutputFileName(fileName);
+            QTextDocument *doc = new QTextDocument();
+            QString html;
+            for(int i = 0; i < ui->listWidget_Messages->count(); ++i)
+            {
+                QListWidgetItem* item = ui->listWidget_Messages->item(i);
+                 html = html + "<p>"+item->text()+"</p>";
+            }
+            qDebug() << "mon html"<< html;
+            doc->setHtml(html);
+            doc->print(&printer);
+}
 
 //THIS FUNCTION AIMS TO SEND A MESSAGE TO ONLY ONE USER ....
 void Messenger_Main::Send_Message(){
