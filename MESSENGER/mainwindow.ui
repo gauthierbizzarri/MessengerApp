@@ -209,6 +209,9 @@ font: 75 13pt &quot;TeX Gyre Bonum Math&quot;;</string>
     font-size: 14px;
     font-weight: 300;</string>
              </property>
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
             </widget>
            </item>
            <item>

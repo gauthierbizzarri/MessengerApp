@@ -63,7 +63,7 @@
      </layout>
     </item>
     <item alignment="Qt::AlignRight">
-     <widget class="QWidget" name="" native="true">
+     <widget class="QWidget" name="widget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
         <widget class="QLabel" name="label_2">
@@ -85,13 +85,6 @@
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QPushButton" name="pushButton_Group_Message">
-           <property name="text">
-            <string>Group Message</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <widget class="QPushButton" name="pushButton_Add_Contact">
            <property name="text">

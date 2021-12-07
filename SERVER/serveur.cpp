@@ -46,13 +46,13 @@ void serveur::check_credentials(const QJsonObject &json)
     int cpt=0;
     for(int i = 0 ;i<=wordList.count()/2;i++)
     {
-        qDebug()<<"LOGIN"<<wordList[i]<<"=?"<<login;
-        qDebug()<<"PASSWORD"<<wordList[i+1]<<"=?"<<password;
         if (wordList[i]==login && wordList[i+1]==password ){
                 //SENDING ANSWER
                 //CREATING JSON WITH ANSWER
                 QJsonObject  answer_JSON_object;
+
                 answer_JSON_object.insert("action", QJsonValue::fromVariant("answerlogin"));
+                mLogin = login;
                 answer_JSON_object.insert("state", QJsonValue::fromVariant("ok"));
 
                 QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
@@ -89,12 +89,13 @@ void serveur::send_message(const QJsonObject &json)
     //GETTING CURRENT TIME
      QString date = QDateTime::currentDateTime().toString(" dd/MM/yy hh:mm");
 
+
      // WRITE INTO THE FILE TO STORE MESSAGES
      QFile file("messages_1.csv");
      if (file.open(QIODevice::Append | QIODevice::Text))
      {
      QTextStream stream(&file);
-     stream <<message<< "\t"<< receivers <<"\n";
+     stream <<message<< ";"<< "Receivers:"+receivers <<";"<< date <<";"<< "From:"+mLogin <<"\n";
      file.close();
      }
     //CREATING JSON
@@ -102,6 +103,7 @@ void serveur::send_message(const QJsonObject &json)
     answer_JSON_object.insert("action", QJsonValue::fromVariant("receive"));
     answer_JSON_object.insert("from", QJsonValue::fromVariant(receivers));
     answer_JSON_object.insert("datetime", QJsonValue::fromVariant(date));
+    answer_JSON_object.insert("content", QJsonValue::fromVariant(message));
 
 
     QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
@@ -129,17 +131,13 @@ void serveur::nouveauJoueur()
     QTcpSocket *connection = mServeur->nextPendingConnection();
     connect(connection, SIGNAL(disconnected()), this, SLOT(sockDisconnected()));
     connect(connection,SIGNAL(readyRead()),this,SLOT(joueurMeParle()));
-    //connect(connection,SIGNAL(readyRead()),this,SLOT(joueurMeParle()));
     mListeSocks << connection;
 }
 
 void serveur::sockDisconnected()
 {
     QTcpSocket * sock = (QTcpSocket*)sender();
-    mListeSocks.removeAll(sock);
-    delete sock;
 }
-
 void serveur::get_messages(const QJsonObject &json)
 {
     QTcpSocket *sock = (QTcpSocket *) sender();
@@ -159,27 +157,35 @@ void serveur::get_messages(const QJsonObject &json)
         QString line = in.readLine();
         // Adding to the model in line with the elements
         // consider that the line separated by semicolons into columns
-            wordList.append(line);
+        for (QString item : line.split(";")) {
+            wordList.append(item);
 
 
-    }
-    qDebug()<<"wordlist"<<wordList;
-    int cpt=0;
-    for(int i = 0 ;i<=wordList.count()-1;i++)
+    }}
+    qDebug()<<"WORDLIST"<<wordList<<"COUNT"<<wordList.count();
+    QString receivers = json["contact"].toString();
+    for(int i = 0 ;i<=wordList.count()-1;)
     {
+        qDebug()<<"worlist i+1"<<wordList[i+1];
+        qDebug()<<"receivers:"<<receivers;
+        //Traiter le cas plusieurs users ...
+        if (wordList[i+1]=="Receivers:"+receivers){
                 //SENDING ANSWER
                 //CREATING JSON WITH ANSWER
                 QJsonObject  answer_JSON_object;
                 answer_JSON_object.insert("messages", QJsonValue::fromVariant(wordList[i]));
                 answer_JSON_object.insert("action", QJsonValue::fromVariant("get_contacts"));
+                answer_JSON_object.insert("date", QJsonValue::fromVariant(wordList[i+2]));
                 QString answer_QString = QJsonDocument(answer_JSON_object).toJson(QJsonDocument::Compact).toStdString().c_str();
                 answer_QString = answer_QString +";";
                 sock->write(answer_QString.toLocal8Bit());
                 qDebug()<<"Server returned : "<<answer_QString;
-                cpt++;
+                }
+        i=i+4;
 
 
     }
+
 }
 void serveur::joueurMeParle()
 {

@@ -27,6 +27,7 @@ private slots:
 private:
     QTcpServer* mServeur;
     QList<QTcpSocket*> mListeSocks;
+    QString mLogin="";
 };
 
 #endif // SERVEUR_H

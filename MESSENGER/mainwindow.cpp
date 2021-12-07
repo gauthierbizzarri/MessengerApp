@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QCryptographicHash>
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -56,7 +57,9 @@ void MainWindow::pushButton_Login_clicked()
 {
     //Getting credentials as a QString
     QString username = ui->lineEdit_username->text();
-    QString password = ui->lineEdit_password->text();
+    QString password =  QCryptographicHash::hash(ui->lineEdit_password->text().toUtf8(),
+            QCryptographicHash::Sha3_512).toHex();
+    qDebug()<<password;
 
     //Creating JSON with credentials
     QJsonObject  credentials;
