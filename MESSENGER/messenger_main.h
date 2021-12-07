@@ -25,7 +25,6 @@ private slots:
     void Send_Message();
     void Get_Messages();
     void Add_Contact();
-    void Get_Contacts();
     void Select_Contact(QListWidgetItem *contact);
 
 private:

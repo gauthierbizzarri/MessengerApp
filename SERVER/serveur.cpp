@@ -8,7 +8,7 @@ using namespace std;
 serveur::serveur(QObject *parent) : QObject(parent)
 {
     mServeur = new QTcpServer(this);
-    connect(mServeur,SIGNAL(newConnection()),this,SLOT(nouveauJoueur()));
+    connect(mServeur,SIGNAL(newConnection()),this,SLOT(nouvelleConnexion()));
     mServeur->listen(QHostAddress::Any,8585);
 }
 
@@ -42,7 +42,6 @@ void serveur::check_credentials(const QJsonObject &json)
         }
 
     }
-    qDebug() <<"EXISTING CREDENTIALS:"<< wordList;
     int cpt=0;
     for(int i = 0 ;i<=wordList.count()/2;i++)
     {
@@ -127,18 +126,20 @@ void serveur::Proceed(const QJsonObject &json){
     };
 }
 
-void serveur::nouveauJoueur()
-{
+
+void serveur::nouvelleConnexion() {
+    qDebug() << "un client c'est connecté au serveur";
     QTcpSocket *connection = mServeur->nextPendingConnection();
     connect(connection, SIGNAL(disconnected()), this, SLOT(sockDisconnected()));
-    connect(connection,SIGNAL(readyRead()),this,SLOT(joueurMeParle()));
-    mListeSocks << connection;
+    connect(connection, SIGNAL(readyRead()), this, SLOT(clientmeparle()));
 }
 
-void serveur::sockDisconnected()
-{
-    QTcpSocket * sock = (QTcpSocket*)sender();
+void serveur::sockDisconnected() {
+    QTcpSocket *sock = (QTcpSocket *) sender();
+    mListeSocks.remove(mListeSocks.key(sock));
+    qDebug() << "un client à quittée le serveur";
 }
+
 void serveur::get_messages(const QJsonObject &json)
 {
     QTcpSocket *sock = (QTcpSocket *) sender();
@@ -188,7 +189,7 @@ void serveur::get_messages(const QJsonObject &json)
     }
 
 }
-void serveur::joueurMeParle()
+void serveur::clientmeparle()
 {
     QTcpSocket *sock = (QTcpSocket *) sender();
     QByteArray data = sock->readAll();

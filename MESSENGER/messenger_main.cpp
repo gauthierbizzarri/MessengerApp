@@ -11,6 +11,8 @@
 #include <QDir>
 #include <QStringList>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QtWidgets>
 
 Messenger_Main::Messenger_Main(QWidget *parent) :
     QMainWindow(parent),
@@ -18,8 +20,10 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
 
 {
     ui->setupUi(this);
+
     //Background image
 
+     ui->lineEdit_message_to_send->setVisible(false);
     QPixmap bkgnd("/home/bizzarri/mess2/login_background.jpg");
     bkgnd = bkgnd.scaled(2000,1100, Qt::IgnoreAspectRatio);
     QPalette palette;
@@ -60,20 +64,17 @@ void Messenger_Main::Add_Contact()
     sock->connectToHost("localhost",8585);
     //get contact from lineEdit_Add_Contact
     //a method will get all contacts and will __ie__contains return a window with existing contacts , the user select it and it will be added
-
-    QString contact = ui->lineEdit_Add_Contact->text();
-    if  (contact=="")
-        return; // We don't add empty contacts
-    else{
+    bool ok;
+    QString contact = QInputDialog::getText(this, tr("Add contact"),
+                                             tr("Enter name:"), QLineEdit::Normal,
+                                             QDir::home().dirName(), &ok);
+   // QString contact = ui->lineEdit_Add_Contact->text();
+    if (ok && !contact.isEmpty()){
         //Adding Contact to the QListWidgetItem
         QListWidgetItem* Contact_Item = new QListWidgetItem(contact);
 
         //Display in listWidget_Contacts
         ui->listWidget_Contacts->addItem(Contact_Item);
-
-        //Making the lineEdit_message_to_send clear (preparing new message to send)
-        ui->lineEdit_Add_Contact->setText("");
-
     }}
 
 //THIS FUNCTION AIMS TO EXPORT THE CURRENT CONVERSATION AS PDF
@@ -82,7 +83,6 @@ void Messenger_Main::Export_PDF(){
                if (QFileInfo(fileName).suffix().isEmpty()) { fileName.append(".pdf"); }
                QPrinter printer(QPrinter::PrinterResolution);
             printer.setOutputFormat(QPrinter::PdfFormat);
-            printer.setPaperSize(QPrinter::A4);
             printer.setOutputFileName(fileName);
             QTextDocument *doc = new QTextDocument();
             QString html;
@@ -91,7 +91,7 @@ void Messenger_Main::Export_PDF(){
                 QListWidgetItem* item = ui->listWidget_Messages->item(i);
                  html = html + "<p>"+item->text()+"</p>";
             }
-            qDebug() << "mon html"<< html;
+
             doc->setHtml(html);
             doc->print(&printer);
 }
@@ -99,9 +99,8 @@ void Messenger_Main::Export_PDF(){
 //THIS FUNCTION AIMS TO SEND A MESSAGE TO ONLY ONE USER ....
 void Messenger_Main::Send_Message(){
     QString message = ui->lineEdit_message_to_send->text();
-    if  (message.isNull())
-        return; // We don't send empty messages
-    else{
+    qDebug()<<ContactSelected->text().isEmpty();
+    if  (!message.isNull() ||!ContactSelected->text().isEmpty()){
         //GETTING RECEIVER
         QString receiver = ContactSelected->text();
 
@@ -110,12 +109,6 @@ void Messenger_Main::Send_Message(){
 
 
 
-        QString date_displayed = QDateTime::currentDateTime().toString(" dd/MM/yy hh:mm");
-        //QString date = QDateTime::currentDateTime().toString(" dd/mm/yy");
-        QString message_formated = date_displayed + ": ->    "+message;
-
-        //Adding message to the QListWidgetItem
-        QListWidgetItem* MessageItem = new QListWidgetItem(message_formated);
 
         //Creating JSON with Message to send
         QJsonObject  message_to_send_JSON;
@@ -127,10 +120,6 @@ void Messenger_Main::Send_Message(){
         QString jsString = doc.toJson(QJsonDocument::Compact);
         qDebug()<<jsString;
         sock->write(jsString.simplified().toLocal8Bit());
-
-        //Display in listWidget_Messages
-        //should get messages with a contact
-        ui->listWidget_Messages->addItem(MessageItem);
 
         //Making the lineEdit_message_to_send clear (preparing new message to send)
         ui->lineEdit_message_to_send->setText("");
@@ -162,22 +151,15 @@ void Messenger_Main::Get_Messages()
 
     }
 }
-
-//THIS FUNCTION AIMS TO GET ALL CONTACTS STORED IN THE DATABASE
-void Messenger_Main::Get_Contacts()
-{
-    //Get contacts from the server, returns a QWidgetList
-}
-
 //THIS FUNCTION ALLOW THE TCHATER TO TALK TO THE USER WH
 void Messenger_Main::Select_Contact(QListWidgetItem *mContact)
 {
 
     QString contact = mContact->text();
     ContactSelected =mContact;
-
+    ui->lineEdit_message_to_send->setVisible(true);
     ui->listWidget_Messages->clear();
-    QMessageBox::information(this, "Messages", "Getting conversation with contact"+contact);
+    QMessageBox::information(this, "Messages", "Getting conversation with contact "+contact);
     ui->label_Contact_Selected->setText("Conversation with :"+contact);
     //Get the conversation with this contact and display it into : listWidget_Messages
     //for element in conversation :

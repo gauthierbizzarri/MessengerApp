@@ -17,16 +17,16 @@ signals:
 
 
 private slots:
-    void nouveauJoueur();
+    void nouvelleConnexion();
+    void clientmeparle();
     void sockDisconnected();
-    void joueurMeParle();
     void Proceed(const QJsonObject &json);
     void check_credentials(const QJsonObject &jsons);
     void get_messages(const QJsonObject &json);
     void send_message(const QJsonObject &json);
 private:
     QTcpServer* mServeur;
-    QList<QTcpSocket*> mListeSocks;
+    QMap<QString,QTcpSocket *> mListeSocks;
     QString mLogin="";
 };
 

@@ -40,10 +40,10 @@
        <widget class="QListWidget" name="listWidget_Messages"/>
       </item>
       <item>
+       <widget class="QLineEdit" name="lineEdit_message_to_send"/>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <item>
-         <widget class="QLineEdit" name="lineEdit_message_to_send"/>
-        </item>
         <item>
          <widget class="QPushButton" name="pushButton_Send_Message">
           <property name="text">
@@ -62,7 +62,7 @@
       </item>
      </layout>
     </item>
-    <item alignment="Qt::AlignRight">
+    <item>
      <widget class="QWidget" name="widget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
@@ -91,9 +91,6 @@
             <string>Add Contact</string>
            </property>
           </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="lineEdit_Add_Contact"/>
          </item>
         </layout>
        </item>

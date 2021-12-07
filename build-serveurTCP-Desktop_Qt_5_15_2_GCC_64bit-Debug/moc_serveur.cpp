@@ -23,7 +23,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_serveur_t {
     QByteArrayData data[11];
-    char stringdata0[117];
+    char stringdata0[121];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,21 +33,22 @@ struct qt_meta_stringdata_serveur_t {
 static const qt_meta_stringdata_serveur_t qt_meta_stringdata_serveur = {
     {
 QT_MOC_LITERAL(0, 0, 7), // "serveur"
-QT_MOC_LITERAL(1, 8, 13), // "nouveauJoueur"
-QT_MOC_LITERAL(2, 22, 0), // ""
-QT_MOC_LITERAL(3, 23, 16), // "sockDisconnected"
-QT_MOC_LITERAL(4, 40, 13), // "joueurMeParle"
-QT_MOC_LITERAL(5, 54, 7), // "Proceed"
-QT_MOC_LITERAL(6, 62, 4), // "json"
-QT_MOC_LITERAL(7, 67, 17), // "check_credentials"
-QT_MOC_LITERAL(8, 85, 5), // "jsons"
-QT_MOC_LITERAL(9, 91, 12), // "get_messages"
-QT_MOC_LITERAL(10, 104, 12) // "send_message"
+QT_MOC_LITERAL(1, 8, 17), // "nouvelleConnexion"
+QT_MOC_LITERAL(2, 26, 0), // ""
+QT_MOC_LITERAL(3, 27, 13), // "clientmeparle"
+QT_MOC_LITERAL(4, 41, 16), // "sockDisconnected"
+QT_MOC_LITERAL(5, 58, 7), // "Proceed"
+QT_MOC_LITERAL(6, 66, 4), // "json"
+QT_MOC_LITERAL(7, 71, 17), // "check_credentials"
+QT_MOC_LITERAL(8, 89, 5), // "jsons"
+QT_MOC_LITERAL(9, 95, 12), // "get_messages"
+QT_MOC_LITERAL(10, 108, 12) // "send_message"
 
     },
-    "serveur\0nouveauJoueur\0\0sockDisconnected\0"
-    "joueurMeParle\0Proceed\0json\0check_credentials\0"
-    "jsons\0get_messages\0send_message"
+    "serveur\0nouvelleConnexion\0\0clientmeparle\0"
+    "sockDisconnected\0Proceed\0json\0"
+    "check_credentials\0jsons\0get_messages\0"
+    "send_message"
 };
 #undef QT_MOC_LITERAL
 
@@ -91,9 +92,9 @@ void serveur::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, voi
         auto *_t = static_cast<serveur *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->nouveauJoueur(); break;
-        case 1: _t->sockDisconnected(); break;
-        case 2: _t->joueurMeParle(); break;
+        case 0: _t->nouvelleConnexion(); break;
+        case 1: _t->clientmeparle(); break;
+        case 2: _t->sockDisconnected(); break;
         case 3: _t->Proceed((*reinterpret_cast< const QJsonObject(*)>(_a[1]))); break;
         case 4: _t->check_credentials((*reinterpret_cast< const QJsonObject(*)>(_a[1]))); break;
         case 5: _t->get_messages((*reinterpret_cast< const QJsonObject(*)>(_a[1]))); break;
