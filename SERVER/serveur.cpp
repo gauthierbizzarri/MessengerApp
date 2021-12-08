@@ -82,8 +82,11 @@ void serveur::send_message(const QJsonObject &json)
     QString receivers ="";
     QJsonArray receivers_Array = json["to"].toArray();
     foreach(const QJsonValue &value, receivers_Array) {
-    receivers = value.toString()+";";
+
+    receivers = value.toString()+",";
     }
+    if (receivers.back()==",")
+        receivers.chop(1);
     //GETTING CURRENT TIME
     QString date = QDateTime::currentDateTime().toString(" dd/MM/yy hh:mm");
 
@@ -92,7 +95,7 @@ void serveur::send_message(const QJsonObject &json)
     if (file.open(QIODevice::Append | QIODevice::Text))
     {
         QTextStream stream(&file);
-        stream <<message<< ";"<<"Receivers:"+receivers<<"From:"+mLogin <<";"<<date<<"\n";
+        stream <<message<< ";"<<"Receivers:"+receivers<<";"<<"From:"+mLogin <<";"<<date<<"\n";
         file.close();
     }
     //CREATING JSON
@@ -152,9 +155,11 @@ void serveur::get_messages(const QJsonObject &json)
     // Create a thread to retrieve data from a file
     QTextStream in(&file);
     //Reads the data up to the end of file
+    int cpt = 0;
     while (!in.atEnd())
     {
-        QString line = in.readLine();
+        QString line = in.readLine();;
+        cpt++;
         // Adding to the model in line with the elements
         // consider that the line separated by semicolons into columns
         for (QString item : line.split(";")) {
@@ -163,11 +168,10 @@ void serveur::get_messages(const QJsonObject &json)
 
         }}
     QString receivers = json["contact"].toString();
-    qDebug()<<"wordlistcoun"<<wordList.count();
+
     for(int i = 0 ;i<=wordList.count()-1;)
     {
-        //Traiter le cas plusieurs users ...
-        if (wordList[i+1]=="Receivers:"+receivers){
+        if (wordList[i+1] == "Receivers:"+receivers){
             //SENDING ANSWER
             //CREATING JSON WITH ANSWER
             QJsonObject  answer_JSON_object;
@@ -183,6 +187,7 @@ void serveur::get_messages(const QJsonObject &json)
             sock->write(answer_QString.toLocal8Bit());
             qDebug()<<"Server returned : "<<answer_QString;
         }
+        cpt++;
         i=i+4;
 
 

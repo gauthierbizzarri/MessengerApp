@@ -28,6 +28,7 @@ private:
     QTcpServer* mServeur;
     QMap<QString,QTcpSocket *> mListeSocks;
     QString mLogin="";
+    int lignes_csv=0;
 };
 
 #endif // SERVEUR_H
