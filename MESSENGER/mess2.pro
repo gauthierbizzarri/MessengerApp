@@ -13,7 +13,8 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    messenger_main.cpp
+    messenger_main.cpp \
+    ressources.cpp
 
 HEADERS += \
     mainwindow.h \

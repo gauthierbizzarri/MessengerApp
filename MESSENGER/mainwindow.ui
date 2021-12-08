@@ -291,12 +291,6 @@ font: 75 13pt &quot;TeX Gyre Bonum Math&quot;;</string>
              <property name="text">
               <string>Login</string>
              </property>
-             <property name="autoDefault">
-              <bool>true</bool>
-             </property>
-             <property name="default">
-              <bool>true</bool>
-             </property>
             </widget>
            </item>
            <item>

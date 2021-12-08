@@ -58,16 +58,12 @@ Messenger_Main::~Messenger_Main()
 //THIS FUNCTION WILL
 void Messenger_Main::Add_Contact()
 {
-    QTcpSocket* sock = new QTcpSocket(this);
-    connect(sock,SIGNAL(readyRead()),this,SLOT(serveurMeParle2()));
-    connect(sock, SIGNAL(disconnected()), sock, SLOT(deleteLater()));
-    sock->connectToHost("localhost",8585);
     //get contact from lineEdit_Add_Contact
     //a method will get all contacts and will __ie__contains return a window with existing contacts , the user select it and it will be added
     bool ok;
     QString contact = QInputDialog::getText(this, tr("Add contact"),
-                                             tr("Enter name:"), QLineEdit::Normal,
-                                             QDir::home().dirName(), &ok);
+                                             tr("Enter name:  \n Separate users with a ," ), QLineEdit::Normal,
+                                             "user1,user2", &ok);
    // QString contact = ui->lineEdit_Add_Contact->text();
     if (ok && !contact.isEmpty()){
         //Adding Contact to the QListWidgetItem
@@ -99,7 +95,7 @@ void Messenger_Main::Export_PDF(){
 
 void Messenger_Main::Send_Message(){
     QString message = ui->lineEdit_message_to_send->text();
-    if  (!message.isNull() ||!ContactSelected->text().isEmpty()){
+    if  (!message.isNull() ||!ContactSelected->text().isEmpty() || message==""){
         //GETTING RECEIVER
         QString receiver = ContactSelected->text();
 
