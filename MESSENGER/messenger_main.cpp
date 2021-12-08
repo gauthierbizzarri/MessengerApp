@@ -24,7 +24,7 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
     //Background image
 
      ui->lineEdit_message_to_send->setVisible(false);
-    QPixmap bkgnd("/home/bizzarri/mess2/login_background.jpg");
+     QPixmap bkgnd(QDir::currentPath()+"/login_background.jpg");
     bkgnd = bkgnd.scaled(2000,1100, Qt::IgnoreAspectRatio);
     QPalette palette;
     palette.setBrush(QPalette::Background, bkgnd);

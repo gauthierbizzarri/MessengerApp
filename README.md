@@ -25,6 +25,8 @@ Now select the wanted Contact to load the conversation
 🖊Now you can write a message to the conversation and send it by clicking on "Send" button
 ⚙️This will send a JSON weft (see : send messages procedure )
 
+📌Now the message is sent , to see the message added to the conversation , reaload the page by double click on the cotnact into the contact list 
+
 ## JSON weft
 
 - LOGIN PROCEDURE (sent from the client) :
