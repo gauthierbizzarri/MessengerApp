@@ -24,6 +24,7 @@ Messenger_Main::Messenger_Main(QWidget *parent) :
     //Background image
 
      ui->lineEdit_message_to_send->setVisible(false);
+     qDebug()<<QDir::currentPath();
      QPixmap bkgnd(QDir::currentPath()+"/login_background.jpg");
     bkgnd = bkgnd.scaled(2000,1100, Qt::IgnoreAspectRatio);
     QPalette palette;
